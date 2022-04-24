@@ -145,7 +145,7 @@ def strip_accents(text):
 def load_vocab(vocab_file):
     """Loads a vocabulary file into a dictionary."""
     if vocab_file ==  None:
-        raise ValueError("Unsupported string type: %s" % (type(text)))
+        raise Exception("Vocab file not provided")
     if isinstance(vocab_file, str) or isinstance(vocab_file, bytes):
         vocab = collections.OrderedDict()
         index = 0
@@ -205,7 +205,7 @@ def convert_tokens_to_ids(vocab, tokens, max_seq_length = None, blank_id = 0, un
     return convert_by_vocab(vocab, tokens, max_seq_length, blank_id, unk_id)
 
 def convert_ids_to_tokens(inv_vocab, ids):
-    return convert_by_vocab(inv_vocab, ids)
+    return convert_by_vocab(inv_vocab, ids, uncased=False)
 
 def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
     """Truncates a pair of sequences to a maximum sequence length."""

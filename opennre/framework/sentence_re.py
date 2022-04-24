@@ -1,10 +1,10 @@
+import os, logging, json
+from tqdm import tqdm
 import torch
 from torch import nn, optim
-import json
 from .data_loader import SentenceRELoader
 from .utils import AverageMeter
-from tqdm import tqdm
-import os
+
 class SentenceRE(nn.Module):
 
     def __init__(self, 
@@ -17,6 +17,7 @@ class SentenceRE(nn.Module):
                  max_epoch=100, 
                  lr=0.1, 
                  weight_decay=1e-5, 
+                 warmup_step=300,
                  opt='sgd'):
     
         super().__init__()
@@ -79,18 +80,25 @@ class SentenceRE(nn.Module):
             self.optimizer = AdamW(grouped_params, correct_bias=False)
         else:
             raise Exception("Invalid optimizer. Must be 'sgd' or 'adam' or 'adamw'.")
+        # Warmup
+        if warmup_step > 0:
+            from transformers import get_linear_schedule_with_warmup
+            training_steps = self.train_loader.dataset.__len__() // batch_size * self.max_epoch
+            self.scheduler = get_linear_schedule_with_warmup(self.optimizer, num_warmup_steps=warmup_step, num_training_steps=training_steps)
+        else:
+            self.scheduler = None
         # Cuda
         if torch.cuda.is_available():
             self.cuda()
         # Ckpt
         self.ckpt = ckpt
 
-    def train_model(self, warmup=True, metric='acc'):
+    def train_model(self, metric='acc'):
         best_metric = 0
         global_step = 0
         for epoch in range(self.max_epoch):
             self.train()
-            print("=== Epoch %d train ===" % epoch)
+            logging.info("=== Epoch %d train ===" % epoch)
             avg_loss = AverageMeter()
             avg_acc = AverageMeter()
             t = tqdm(self.train_loader)
@@ -112,29 +120,24 @@ class SentenceRE(nn.Module):
                 avg_acc.update(acc, 1)
                 t.set_postfix(loss=avg_loss.avg, acc=avg_acc.avg)
                 # Optimize
-                if warmup == True:
-                    warmup_step = 300
-                    if global_step < warmup_step:
-                        warmup_rate = float(global_step) / warmup_step
-                    else:
-                        warmup_rate = 1.0
-                    for param_group in self.optimizer.param_groups:
-                        param_group['lr'] = self.lr * warmup_rate
                 loss.backward()
                 self.optimizer.step()
+                if self.scheduler is not None:
+                    self.scheduler.step()
                 self.optimizer.zero_grad()
                 global_step += 1
             # Val 
-            print("=== Epoch %d val ===" % epoch)
+            logging.info("=== Epoch %d val ===" % epoch)
             result = self.eval_model(self.val_loader) 
+            logging.info('Metric {} current / best: {} / {}'.format(metric, result[metric], best_metric))
             if result[metric] > best_metric:
-                print("Best ckpt and saved.")
+                logging.info("Best ckpt and saved.")
                 folder_path = '/'.join(self.ckpt.split('/')[:-1])
                 if not os.path.exists(folder_path):
                     os.mkdir(folder_path)
                 torch.save({'state_dict': self.model.state_dict()}, self.ckpt)
                 best_metric = result[metric]
-        print("Best %s on val set: %f" % (metric, best_metric))
+        logging.info("Best %s on val set: %f" % (metric, best_metric))
 
     def eval_model(self, eval_loader):
         self.eval()

@@ -1,80 +1,10 @@
-# 中文关系抽取
-使用哈工大，BERT-wwm，中文bert，在20w中文人物关系数据上的准确率达到0.97
-hellp
-## 训练结果
-=== Epoch 0 train ===
-100%|██████████████████████████████████████████████████████████████████| 3094/3094 [40:12<00:00,  1.28it/s, acc=0.773, loss=0.687]
-=== Epoch 0 val ===
-100%|██████████████████████████████████████████████████████████████████████████████████| 16/16 [00:06<00:00,  2.42it/s, acc=0.934]
-Best ckpt and saved.
-=== Epoch 1 train ===
-100%|██████████████████████████████████████████████████████████████████| 3094/3094 [38:17<00:00,  1.35it/s, acc=0.923, loss=0.235]
-=== Epoch 1 val ===
-100%|██████████████████████████████████████████████████████████████████████████████████| 16/16 [00:05<00:00,  2.78it/s, acc=0.972]
-Best ckpt and saved.
-=== Epoch 2 train ===
-100%|██████████████████████████████████████████████████████████████████| 3094/3094 [22:43<00:00,  2.27it/s, acc=0.961, loss=0.121]
-=== Epoch 2 val ===
-100%|██████████████████████████████████████████████████████████████████████████████████| 16/16 [00:05<00:00,  2.71it/s, acc=0.986]
-Best ckpt and saved.
-Best acc on val set: 0.986000
-100%|██████████████████████████████████████████████████████████████████████████████████| 16/16 [00:06<00:00,  2.64it/s, acc=0.986]
-Accuracy on test set: 0.986
-## 测试结果
-    model.infer({'text': '场照片事后将发给媒体，避免采访时出现混乱，[3]举行婚礼侯佩岑黄伯俊婚纱照2011年4月17日下午2点，70名亲友见 证下，侯佩', 'h': {'pos': (28, 30)}, 't': {'pos': (31, 33)}})
-
-('夫妻', 0.9995878338813782)
-
-    model.infer({'text': '及他们的女儿小苹果与汪峰感情纠葛2004年，葛荟婕在欧洲杯期间录制节目时与汪峰相识并相恋，汪峰那首《我如此爱你', 'h': {'pos': (10, 11)}, 't': {'pos': (22, 24)}})
-
-('情侣', 0.9992896318435669)
-
-    model.infer({'text': '14日，彭加木的侄女彭丹凝打通了彭加木儿子彭海的电话，“堂哥已经知道了，他说这些年传得太多，他不相信是真的', 'h': {'pos': (4, 6)}, 't': {'pos': (22, 21)}})
-
-('父母', 0.8954808712005615)
-
-    model.infer({'text': '名旦吴菱仙是位列“同治十三绝”的名旦时小福的弟子，算得梅兰芳的开蒙老师，早年曾搭过梅巧玲的四喜班，旧谊', 'h': {'pos': (2, 4)}, 't': {'pos': (27, 29)}})
-
-('师生', 0.996309220790863)
-
-
-# 使用前准备
-1.bert模型下载：在./pretrain/下面放置chinese_wwm_pytorch模型，下载地址：https://github.com/ymcui/Chinese-BERT-wwm
-
-2.数据下载：在./benchmark/people-relation/下执行gen.py,生产中文人物关系数据，具体脚本中有说明。
-
-3.配置环境变量：vim ~/.bash_profile  添加
-
-    # openNRE
-
-    export openNRE=项目位置
-    
-
-# 注意事项
- 如果自己训练了tensorflow 的bert，可以通过https://github.com/huggingface/transformers 里面的convert_bert_original_tf_checkpoint_to_pytorch.py 脚本转换为pytorch版。
-
-踩坑：
-
-1.安装tensorflow 2.0，最终用的都是PyTorch模型，但TensorFlow也得安装
-
-2.构造checkpoint文件
-
-3.报错：Embedding' object has no attribute 'shape' ，解决：将报错位置assert那几行直接删除
-
-
-
-
-
-
------
-
-----
-----
-
-
-
-以下是原工程内容
 # OpenNRE
+
+****** Update ******
+
+We provide two distantly-supervised datasets with human-annotated test sets, **NYT10m** and **Wiki20m**. Check the [datasets](#datasets) section for details.
+
+****** Update ******
 
 OpenNRE is an open-source and extensible toolkit that provides a unified framework to implement relation extraction models. This package is designed for the following groups:
 
@@ -96,12 +26,15 @@ Relation extraction is a crucial technique in automatic knowledge graph construc
 A good research work is always accompanied by a thorough and faithful reference. If you use or extend our work, please cite the following paper:
 
 ```
-    @inproceedings{han2019opennre,
-      title={OpenNRE: An Open and Extensible Toolkit for Neural Relation Extraction},
-      author={Han, Xu and Gao, Tianyu and Yao, Yuan and Ye, Deming and Liu, Zhiyuan and Sun, Maosong },
-      booktitle={Proceedings of EMNLP},
-      year={2019}
-    }
+@inproceedings{han-etal-2019-opennre,
+    title = "{O}pen{NRE}: An Open and Extensible Toolkit for Neural Relation Extraction",
+    author = "Han, Xu and Gao, Tianyu and Yao, Yuan and Ye, Deming and Liu, Zhiyuan and Sun, Maosong",
+    booktitle = "Proceedings of EMNLP-IJCNLP: System Demonstrations",
+    year = "2019",
+    url = "https://www.aclweb.org/anthology/D19-3029",
+    doi = "10.18653/v1/D19-3029",
+    pages = "169--174"
+}
 ```
 
 It's our honor to help you better explore relation extraction with our OpenNRE toolkit!
@@ -137,6 +70,8 @@ Then install all the requirements:
 pip install -r requirements.txt
 ```
 
+**Note**: Please choose appropriate PyTorch version based on your machine (related to your CUDA version). For details, refer to https://pytorch.org/. 
+
 Then install the package with 
 ```
 python setup.py install 
@@ -155,7 +90,7 @@ bash benchmark/download_fewrel.sh
 
 ## Easy Start
 
-Add `OpenNRE` directory to the `PYTHONPATH` environment variable, or open a python session under the `OpenNRE` folder. Then import our package and load pre-trained models.
+Make sure you have installed OpenNRE as instructed above. Then import our package and load pre-trained models.
 
 ```python
 >>> import opennre
@@ -171,8 +106,46 @@ Note that it may take a few minutes to download checkpoint and data for the firs
 
 You will get the relation result and its confidence score.
 
-For higher-level usage, you can refer to our [document](https://opennre-docs.readthedocs.io/en/latest/).
+If you want to use the model on your GPU, just run 
+```python
+>>> model = model.cuda()
+```
+before calling the inference function.
 
-## Google Group
+For now, we have the following available models:
 
-If you want to receive our update news or take part in discussions, please join our [Google Group](https://groups.google.com/forum/#!forum/opennre/join)
+* `wiki80_cnn_softmax`: trained on `wiki80` dataset with a CNN encoder.
+* `wiki80_bert_softmax`: trained on `wiki80` dataset with a BERT encoder.
+* `wiki80_bertentity_softmax`: trained on `wiki80` dataset with a BERT encoder (using entity representation concatenation).
+* `tacred_bert_softmax`: trained on `TACRED` dataset with a BERT encoder.
+* `tacred_bertentity_softmax`: trained on `TACRED` dataset with a BERT encoder (using entity representation concatenation).
+
+## Datasets 
+
+You can go into the `benchmark` folder and download datasets using our scripts. We also list some of the information about the datasets in [this document](https://opennre-docs.readthedocs.io/en/latest/get_started/benchmark.html#bag-level-relation-extraction). 
+
+## Training
+
+You can train your own models on your own data with OpenNRE. In `example` folder we give example training codes for supervised RE models and bag-level RE models. You can either use our provided datasets or your own datasets. For example, you can use the following script to train a PCNN-ATT bag-level model on the NYT10 dataset with manual test set:
+```bash
+python example/train_bag_cnn.py \
+    --metric auc \
+    --dataset nyt10m \
+    --batch_size 160 \
+    --lr 0.1 \
+    --weight_decay 1e-5 \
+    --max_epoch 100 \
+    --max_length 128 \
+    --seed 42 \
+    --encoder pcnn \
+    --aggr att
+```
+
+Or use the following script to train a BERT model on the Wiki80 dataset:
+```bash
+python example/train_supervised_bert.py \
+    --pretrain_path bert-base-uncased \
+    --dataset wiki80
+```
+
+We provide many options in the example training code and you can check them out for detailed instructions.

@@ -19,7 +19,7 @@ class BagRE(nn.Module):
                  lr=0.1, 
                  weight_decay=1e-5, 
                  opt='sgd',
-                 bag_size=None,
+                 bag_size=0,
                  loss_weight=False):
     
         super().__init__()
@@ -43,7 +43,7 @@ class BagRE(nn.Module):
                 model.sentence_encoder.tokenize,
                 batch_size,
                 False,
-                bag_size=None,
+                bag_size=bag_size,
                 entpair_as_bag=True)
         
         if test_path != None:
@@ -53,7 +53,7 @@ class BagRE(nn.Module):
                 model.sentence_encoder.tokenize,
                 batch_size,
                 False,
-                bag_size=None,
+                bag_size=bag_size,
                 entpair_as_bag=True
             )
         # Model
@@ -97,8 +97,8 @@ class BagRE(nn.Module):
         # Ckpt
         self.ckpt = ckpt
 
-    def train_model(self):
-        best_auc = 0
+    def train_model(self, metric='auc'):
+        best_metric = 0
         for epoch in range(self.max_epoch):
             # Train
             self.train()
@@ -143,13 +143,13 @@ class BagRE(nn.Module):
             # Val 
             print("=== Epoch %d val ===" % epoch)
             result = self.eval_model(self.val_loader)
-            print("auc: %.4f" % result['auc'])
-            print("f1: %.4f" % (result['f1']))
-            if result['auc'] > best_auc:
+            print("AUC: %.4f" % result['auc'])
+            print("Micro F1: %.4f" % (result['max_micro_f1']))
+            if result[metric] > best_metric:
                 print("Best ckpt and saved.")
                 torch.save({'state_dict': self.model.module.state_dict()}, self.ckpt)
-                best_auc = result['auc']
-        print("Best auc on val set: %f" % (best_auc))
+                best_metric = result[metric]
+        print("Best %s on val set: %f" % (metric, best_metric))
 
     def eval_model(self, eval_loader):
         self.model.eval()
@@ -167,14 +167,15 @@ class BagRE(nn.Module):
                 bag_name = data[1]
                 scope = data[2]
                 args = data[3:]
-                logits = self.model(None, scope, *args, train=False) # results after softmax
-                for i in range(logits.size(0)):
+                logits = self.model(None, scope, *args, train=False, bag_size=self.bag_size) # results after softmax
+                logits = logits.cpu().numpy()
+                for i in range(len(logits)):
                     for relid in range(self.model.module.num_class):
                         if self.model.module.id2rel[relid] != 'NA':
                             pred_result.append({
                                 'entpair': bag_name[i][:2], 
                                 'relation': self.model.module.id2rel[relid], 
-                                'score': logits[i][relid].item()
+                                'score': logits[i][relid]
                             })
             result = eval_loader.dataset.eval(pred_result)
         return result
