@@ -133,3 +133,6 @@ opennre-egg.info
 benchmark/nyt10-ori
 train_nyt10_pcnn_att_ori.py
 >>>>>>> ebf8370... fix pcnn bug
+
+.DS_Store
+opennre/.DS_Store
