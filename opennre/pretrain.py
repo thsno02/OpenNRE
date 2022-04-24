@@ -9,7 +9,8 @@ import numpy as np
 import logging
 
 root_url = "https://thunlp.oss-cn-qingdao.aliyuncs.com/"
-default_root_path = os.path.join(os.getenv('HOME'), '.opennre')
+# modify the root path
+default_root_path = os.path.join(os.getcwd(), 'opennre')
 
 def check_root(root_path=default_root_path):
     if not os.path.exists(root_path):
@@ -97,6 +98,10 @@ def download_pretrain(model_name, root_path=default_root_path):
     if not os.path.exists(ckpt):
         os.system('wget -P ' + os.path.join(root_path, 'pretrain/nre')  + ' ' + root_url + 'opennre/pretrain/nre/' + model_name + '.pth.tar')
 
+# add people-relation dataset check function
+def download_people_relation(root_path=default_root_path):
+    check_root()
+
 def download(name, root_path=default_root_path):
     if not os.path.exists(os.path.join(root_path, 'benchmark')):
         os.mkdir(os.path.join(root_path, 'benchmark'))
@@ -120,6 +125,9 @@ def download(name, root_path=default_root_path):
         download_glove(root_path=root_path)
     elif name == 'bert_base_uncased':
         download_bert_base_uncased(root_path=root_path)
+    # add the people-relation dataset
+    elif name == 'people-relation':
+        download_people_relation(root_path=root_path)
     else:
         raise Exception('Cannot find corresponding data.')
 
@@ -171,6 +179,17 @@ def get_model(model_name, root_path=default_root_path):
         else:
             sentence_encoder = encoder.BERTEncoder(
                 max_length=80, pretrain_path=os.path.join(root_path, 'pretrain/bert-base-uncased'))
+        m = model.SoftmaxNN(sentence_encoder, len(rel2id), rel2id)
+        m.load_state_dict(torch.load(ckpt, map_location='cpu')['state_dict'])
+        return m
+    elif model_name == 'chinese_wwm':
+        rel2id = json.load(open(os.path.join(root_path, 'benchmark/people-relation/people-relation_rel2id.json')))
+        if 'entity' in model_name:
+            sentence_encoder = encoder.BERTEntityEncoder(
+                max_length=80, pretrain_path=os.path.join(root_path, 'pretrain/chinese_wwm'))
+        else:
+            sentence_encoder = encoder.BERTEncoder(
+                max_length=80, pretrain_path=os.path.join(root_path, 'pretrain/chinese_wwm'))
         m = model.SoftmaxNN(sentence_encoder, len(rel2id), rel2id)
         m.load_state_dict(torch.load(ckpt, map_location='cpu')['state_dict'])
         return m
