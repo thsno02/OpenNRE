@@ -1,7 +1,3 @@
-# Dataset
-
-The valid dataset is a sub dataset of the trainning dataset, thus the model implemented by @taorui has a 0.97 accuarcy.
-
 # Chinese_wwm
 
 ## Load the pre-train LM
@@ -18,4 +14,3 @@ The valid dataset is a sub dataset of the trainning dataset, thus the model impl
  ```
 
  The `ckpt` file will save in `OpenNRE/ckpt` folder.
- 
