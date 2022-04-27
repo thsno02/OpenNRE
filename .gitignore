@@ -116,10 +116,8 @@ ckpt
 benchmark/tacred
 *.swp
 
-<<<<<<< HEAD
 # data and pretrain
 pretrain
-benchmark
 !benchmark/*.sh
 !pretrain/*.sh
 
@@ -128,11 +126,34 @@ benchmark
 
 # package
 opennre-egg.info
-=======
 # debug
 benchmark/nyt10-ori
 train_nyt10_pcnn_att_ori.py
->>>>>>> ebf8370... fix pcnn bug
 
 .DS_Store
 opennre/.DS_Store
+opennre/benchmark/semeval/semeval_rel2id.json
+opennre/benchmark/semeval/semeval_test.txt
+opennre/benchmark/semeval/semeval_train.txt
+opennre/benchmark/semeval/semeval_val.txt
+opennre/benchmark/wiki20m/wiki20m_rel2id.json
+opennre/benchmark/wiki20m/wiki20m_test.txt
+opennre/benchmark/wiki20m/wiki20m_train.txt
+opennre/benchmark/wiki20m/wiki20m_val.txt
+opennre/benchmark/wiki80/wiki80_rel2id.json
+opennre/benchmark/wiki80/wiki80_train.txt
+opennre/benchmark/wiki80/wiki80_val.txt
+benchmark/download_nyt10m.sh
+benchmark/download_wiki20m.sh
+benchmark/rel4wiki80.md
+opennre/benchmark/fewrel/fewrel_train_rel2id.json
+opennre/benchmark/fewrel/fewrel_train.txt
+opennre/benchmark/fewrel/fewrel_val_rel2id.json
+opennre/benchmark/fewrel/fewrel_val.txt
+opennre/benchmark/nyt10/nyt10_rel2id.json
+opennre/benchmark/nyt10/nyt10_test.txt
+opennre/benchmark/nyt10/nyt10_train.txt
+opennre/benchmark/nyt10m/nyt10m_rel2id.json
+opennre/benchmark/nyt10m/nyt10m_test.txt
+opennre/benchmark/nyt10m/nyt10m_train.txt
+opennre/benchmark/nyt10m/nyt10m_val.txt
